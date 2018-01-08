@@ -152,6 +152,7 @@ class Container
      *
      * @param string $classOrInterface
      * @param string $instanceClass Default null.
+     * @throws Exception
      */
     public function singleton($classOrInterface, $instanceClass = null)
     {
@@ -163,6 +164,7 @@ class Container
      *
      * @param string $classOrInterface
      * @param object $object
+     * @throws Exception
      */
     public function instance($classOrInterface, $object)
     {
@@ -179,6 +181,7 @@ class Container
      * @param string $classOrInterface
      * @param array $resolveParameters Default [].
      * @return object
+     * @throws Exception
      */
     public function make($classOrInterface, array $resolveParameters = [])
     {
@@ -260,6 +263,7 @@ class Container
      *
      * @param string $classOrInterface
      * @param object $object
+     * @throws Exception
      */
     private function validateObject($classOrInterface, $object)
     {
@@ -272,12 +276,12 @@ class Container
      * @param string $class
      * @param array $params
      * @return object
-     * @throws \Exception
+     * @throws Exception
      */
     private function newInstance($class, array $params)
     {
         if (!class_exists($class)) {
-            throw new \Exception('Class ' . $class . ' does not exist.');
+            throw new Exception('Class ' . $class . ' does not exist.');
         }
         $reflectionClass = new \ReflectionClass($class);
         return $reflectionClass->newInstanceArgs($params);
