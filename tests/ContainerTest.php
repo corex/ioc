@@ -39,6 +39,8 @@ class ContainerTest extends TestCase
 
     /**
      * Test clear.
+     *
+     * @throws Exception
      */
     public function testClear()
     {
@@ -58,6 +60,8 @@ class ContainerTest extends TestCase
 
     /**
      * Test get bindings one.
+     *
+     * @throws Exception
      */
     public function testGetBindingsOne()
     {
@@ -69,6 +73,8 @@ class ContainerTest extends TestCase
 
     /**
      * Test get binding.
+     *
+     * @throws Exception
      */
     public function testGetBinding()
     {
@@ -80,6 +86,8 @@ class ContainerTest extends TestCase
 
     /**
      * Test has.
+     *
+     * @throws Exception
      */
     public function testHas()
     {
@@ -91,6 +99,8 @@ class ContainerTest extends TestCase
 
     /**
      * Test has instance.
+     *
+     * @throws Exception
      */
     public function testHasInstance()
     {
@@ -102,6 +112,8 @@ class ContainerTest extends TestCase
 
     /**
      * Test is shared.
+     *
+     * @throws Exception
      */
     public function testIsShared()
     {
@@ -116,6 +128,8 @@ class ContainerTest extends TestCase
 
     /**
      * Test is singleton.
+     *
+     * @throws Exception
      */
     public function testIsSingleton()
     {
@@ -130,6 +144,8 @@ class ContainerTest extends TestCase
 
     /**
      * Test forget.
+     *
+     * @throws Exception
      */
     public function testForget()
     {
@@ -148,6 +164,8 @@ class ContainerTest extends TestCase
 
     /**
      * Test bind.
+     *
+     * @throws Exception
      */
     public function testBind()
     {
@@ -159,6 +177,8 @@ class ContainerTest extends TestCase
 
     /**
      * Test singleton.
+     *
+     * @throws Exception
      */
     public function testSingleton()
     {
@@ -170,6 +190,8 @@ class ContainerTest extends TestCase
 
     /**
      * Test instance.
+     *
+     * @throws Exception
      */
     public function testInstance()
     {
@@ -178,6 +200,8 @@ class ContainerTest extends TestCase
 
     /**
      * Test make.
+     *
+     * @throws Exception
      */
     public function testMake()
     {
@@ -188,7 +212,29 @@ class ContainerTest extends TestCase
     }
 
     /**
+     * Test make with singleting.
+     *
+     * @throws Exception
+     */
+    public function testMakeWithSingleton()
+    {
+        $container = $this->container();
+        $container->singleton(BaseTestInterface::class, Test::class);
+
+        // Make instance 1 and set test value.
+        $instance1 = $container->make(BaseTestInterface::class);
+        $instance1->test = md5(mt_rand(1, 100000));
+
+        // Make instance 2 and test previous set value.
+        $instance2 = $container->make(BaseTestInterface::class);
+
+        $this->assertEquals($instance1, $instance2);
+    }
+
+    /**
      * Test make no extends.
+     *
+     * @throws Exception
      */
     public function testMakeNoExtends()
     {
@@ -204,6 +250,8 @@ class ContainerTest extends TestCase
 
     /**
      * Test make no implements.
+     *
+     * @throws Exception
      */
     public function testMakeNoImplements()
     {
@@ -219,6 +267,8 @@ class ContainerTest extends TestCase
 
     /**
      * Test dependency injection not found.
+     *
+     * @throws Exception
      */
     public function testDependencyInjectionNotFound()
     {
@@ -231,6 +281,8 @@ class ContainerTest extends TestCase
 
     /**
      * Test dependency injection injected.
+     *
+     * @throws Exception
      */
     public function testDependencyInjectionInjected()
     {

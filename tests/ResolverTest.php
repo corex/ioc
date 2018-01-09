@@ -11,6 +11,8 @@ class ResolverTest extends TestCase
 {
     /**
      * Test resolve constructor.
+     *
+     * @throws \CoRex\IoC\Exception
      */
     public function testResolveConstructor()
     {
