@@ -283,8 +283,12 @@ class Container
         if (!class_exists($class)) {
             throw new Exception('Class ' . $class . ' does not exist.');
         }
-        $reflectionClass = new \ReflectionClass($class);
-        return $reflectionClass->newInstanceArgs($params);
+        try {
+            $reflectionClass = new \ReflectionClass($class);
+            return $reflectionClass->newInstanceArgs($params);
+        } catch (\ReflectionException $e) {
+            throw new Exception($e->getMessage(), $e->getCode(), $e);
+        }
     }
 
     /**

@@ -14,6 +14,7 @@ class BindingTest extends TestCase
 {
     /**
      * Test constructor class.
+     * @throws Exception
      */
     public function testConstructorClass()
     {
@@ -30,6 +31,7 @@ class BindingTest extends TestCase
 
     /**
      * Test constructor interface.
+     * @throws Exception
      */
     public function testConstructorInterface()
     {
@@ -46,6 +48,7 @@ class BindingTest extends TestCase
 
     /**
      * Test constructor not class.
+     * @throws Exception
      */
     public function testConstructorNotClass()
     {
@@ -61,6 +64,7 @@ class BindingTest extends TestCase
 
     /**
      * Test constructor not instance class.
+     * @throws Exception
      */
     public function testConstructorNotInstanceClass()
     {
@@ -76,6 +80,7 @@ class BindingTest extends TestCase
 
     /**
      * Test is shared.
+     * @throws Exception
      */
     public function testIsShared()
     {
@@ -88,6 +93,7 @@ class BindingTest extends TestCase
 
     /**
      * Test get instance class.
+     * @throws Exception
      */
     public function testGetInstanceClass()
     {

@@ -16,13 +16,17 @@ class Resolver
     public static function resolveConstructor($class, array $resolveParameters = [], $resolveTypeHints = true)
     {
         $resolvedParameters = [];
-        $reflectionClass = new \ReflectionClass($class);
-        $constructor = $reflectionClass->getConstructor();
-        if ($constructor !== null) {
-            $parameters = $constructor->getParameters();
-            if (count($parameters) > 0) {
-                $resolvedParameters = self::resolveParameters($parameters, $resolveParameters, $resolveTypeHints);
+        try {
+            $reflectionClass = new \ReflectionClass($class);
+            $constructor = $reflectionClass->getConstructor();
+            if ($constructor !== null) {
+                $parameters = $constructor->getParameters();
+                if (count($parameters) > 0) {
+                    $resolvedParameters = self::resolveParameters($parameters, $resolveParameters, $resolveTypeHints);
+                }
             }
+        } catch (\ReflectionException $e) {
+            throw new Exception($e->getMessage(), $e->getCode(), $e);
         }
         return $resolvedParameters;
     }
