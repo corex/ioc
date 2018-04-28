@@ -24,7 +24,7 @@ class Container
     public static function getInstance()
     {
         if (!is_object(self::$instance)) {
-            self::$instance = new self();
+            self::$instance = new static();
         }
         return self::$instance;
     }
