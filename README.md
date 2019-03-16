@@ -1,6 +1,9 @@
 # CoRex IoC
 
-**_Versioning for this package follows http://semver.org/. Backwards compatibility might break on upgrade to major versions._**
+![License](https://img.shields.io/packagist/l/corex/ioc.svg)
+![Build Status](https://travis-ci.org/corex/ioc.svg?branch=master)
+![codecov](https://codecov.io/gh/corex/ioc/branch/master/graph/badge.svg)
+
 
 This is a simple container helping managing class dependencies and performing dependency injection.
 
