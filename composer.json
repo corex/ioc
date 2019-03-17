@@ -13,8 +13,8 @@
         "php": ">=7.0"
     },
     "require-dev": {
-        "phpunit/phpunit": "^6.2",
-        "corex/support": "^2.5"
+        "phpunit/phpunit": "^8.0",
+        "corex/helpers": "^2.0"
     },
     "autoload": {
         "psr-4": {

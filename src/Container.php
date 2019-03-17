@@ -280,9 +280,6 @@ class Container
      */
     private function newInstance($class, array $params)
     {
-        if (!class_exists($class)) {
-            throw new Exception('Class ' . $class . ' does not exist.');
-        }
         try {
             $reflectionClass = new \ReflectionClass($class);
             return $reflectionClass->newInstanceArgs($params);

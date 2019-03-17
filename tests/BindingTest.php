@@ -2,9 +2,9 @@
 
 namespace Tests\CoRex\IoC;
 
+use CoRex\Helpers\Obj;
 use CoRex\IoC\Binding;
 use CoRex\IoC\Exception;
-use CoRex\Support\Obj;
 use PHPUnit\Framework\TestCase;
 use Tests\CoRex\IoC\Helpers\BaseTest;
 use Tests\CoRex\IoC\Helpers\BaseTestInterface;
@@ -14,7 +14,7 @@ class BindingTest extends TestCase
 {
     /**
      * Test constructor class.
-     * @throws Exception
+     * @throws \Exception
      */
     public function testConstructorClass()
     {
@@ -23,15 +23,15 @@ class BindingTest extends TestCase
         $shared = mt_rand(0, 1) == 1;
         $binding = new Binding($classOrInterface, $instanceClass, $shared);
 
-        $this->assertEquals($classOrInterface, Obj::getProperty($binding, 'classOrInterface'));
-        $this->assertFalse(Obj::getProperty($binding, 'isInterface'));
-        $this->assertEquals($instanceClass, Obj::getProperty($binding, 'instanceClass'));
-        $this->assertEquals($shared, Obj::getProperty($binding, 'shared'));
+        $this->assertEquals($classOrInterface, Obj::getProperty('classOrInterface', $binding));
+        $this->assertFalse(Obj::getProperty('isInterface', $binding));
+        $this->assertEquals($instanceClass, Obj::getProperty('instanceClass', $binding));
+        $this->assertEquals($shared, Obj::getProperty('shared', $binding));
     }
 
     /**
      * Test constructor interface.
-     * @throws Exception
+     * @throws \Exception
      */
     public function testConstructorInterface()
     {
@@ -40,15 +40,15 @@ class BindingTest extends TestCase
         $shared = mt_rand(0, 1) == 1;
         $binding = new Binding($classOrInterface, $instanceClass, $shared);
 
-        $this->assertEquals($classOrInterface, Obj::getProperty($binding, 'classOrInterface'));
-        $this->assertTrue(Obj::getProperty($binding, 'isInterface'));
-        $this->assertEquals($instanceClass, Obj::getProperty($binding, 'instanceClass'));
-        $this->assertEquals($shared, Obj::getProperty($binding, 'shared'));
+        $this->assertEquals($classOrInterface, Obj::getProperty('classOrInterface', $binding));
+        $this->assertTrue(Obj::getProperty('isInterface', $binding));
+        $this->assertEquals($instanceClass, Obj::getProperty('instanceClass', $binding));
+        $this->assertEquals($shared, Obj::getProperty('shared', $binding));
     }
 
     /**
      * Test constructor not class.
-     * @throws Exception
+     * @throws \Exception
      */
     public function testConstructorNotClass()
     {
@@ -64,7 +64,7 @@ class BindingTest extends TestCase
 
     /**
      * Test constructor not instance class.
-     * @throws Exception
+     * @throws \Exception
      */
     public function testConstructorNotInstanceClass()
     {
@@ -80,7 +80,7 @@ class BindingTest extends TestCase
 
     /**
      * Test is shared.
-     * @throws Exception
+     * @throws \Exception
      */
     public function testIsShared()
     {
@@ -93,7 +93,7 @@ class BindingTest extends TestCase
 
     /**
      * Test get instance class.
-     * @throws Exception
+     * @throws \Exception
      */
     public function testGetInstanceClass()
     {
