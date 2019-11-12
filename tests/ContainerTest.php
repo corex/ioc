@@ -1,12 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\CoRex\IoC;
 
 use CoRex\Helpers\Obj;
 use CoRex\IoC\Binding;
 use CoRex\IoC\Container;
-use CoRex\IoC\Exception;
+use CoRex\IoC\Exceptions\IoCException;
+use Exception;
 use PHPUnit\Framework\TestCase;
+use ReflectionException;
+use Tests\CoRex\IoC\Helpers\BadClass;
 use Tests\CoRex\IoC\Helpers\BaseTest;
 use Tests\CoRex\IoC\Helpers\BaseTestInterface;
 use Tests\CoRex\IoC\Helpers\Test;
@@ -18,9 +23,11 @@ use Tests\CoRex\IoC\Helpers\TestNoExtends;
 class ContainerTest extends TestCase
 {
     /**
-     * Test constructor.
+     * Test.
+     *
+     * @throws ReflectionException
      */
-    public function testConstructor()
+    public function testConstructor(): void
     {
         $container = $this->container();
         $this->assertEquals([], Obj::getProperty('bindings', $container));
@@ -30,7 +37,7 @@ class ContainerTest extends TestCase
     /**
      * Test get instance.
      */
-    public function testGetInstance()
+    public function testGetInstance(): void
     {
         $container = $this->container();
         $this->assertNotNull($container);
@@ -40,9 +47,9 @@ class ContainerTest extends TestCase
     /**
      * Test clear.
      *
-     * @throws \Exception
+     * @throws Exception
      */
-    public function testClear()
+    public function testClear(): void
     {
         $container = $this->container();
         $container->bind(Test::class);
@@ -53,7 +60,7 @@ class ContainerTest extends TestCase
     /**
      * Test get bindings none.
      */
-    public function testGetBindingsNone()
+    public function testGetBindingsNone(): void
     {
         $this->assertEquals([], $this->container()->getBindings());
     }
@@ -61,9 +68,9 @@ class ContainerTest extends TestCase
     /**
      * Test get bindings one.
      *
-     * @throws \Exception
+     * @throws Exception
      */
-    public function testGetBindingsOne()
+    public function testGetBindingsOne(): void
     {
         $container = $this->container();
         $container->bind(Test::class);
@@ -74,9 +81,9 @@ class ContainerTest extends TestCase
     /**
      * Test get binding.
      *
-     * @throws \Exception
+     * @throws Exception
      */
-    public function testGetBinding()
+    public function testGetBinding(): void
     {
         $container = $this->container();
         $container->bind(Test::class);
@@ -87,9 +94,9 @@ class ContainerTest extends TestCase
     /**
      * Test has.
      *
-     * @throws \Exception
+     * @throws Exception
      */
-    public function testHas()
+    public function testHas(): void
     {
         $container = $this->container();
         $this->assertFalse($container->has(Test::class));
@@ -100,22 +107,23 @@ class ContainerTest extends TestCase
     /**
      * Test has instance.
      *
-     * @throws \Exception
+     * @throws Exception
      */
-    public function testHasInstance()
+    public function testHasInstance(): void
     {
         $container = $this->container();
         $this->assertFalse($container->hasInstance(Test::class));
         $container->instance(Test::class, new Test());
         $this->assertTrue($container->hasInstance(Test::class));
+        $this->assertTrue($container->getBinding(Test::class)->isShared());
     }
 
     /**
      * Test is shared.
      *
-     * @throws \Exception
+     * @throws Exception
      */
-    public function testIsShared()
+    public function testIsShared(): void
     {
         $container = $this->container();
         $container->bind(Test::class);
@@ -129,9 +137,9 @@ class ContainerTest extends TestCase
     /**
      * Test is noy shared.
      *
-     * @throws \Exception
+     * @throws Exception
      */
-    public function testIsNotShared()
+    public function testIsNotShared(): void
     {
         $container = $this->container();
         $this->assertFalse($container->isShared(Test::class));
@@ -140,9 +148,9 @@ class ContainerTest extends TestCase
     /**
      * Test is singleton.
      *
-     * @throws \Exception
+     * @throws Exception
      */
-    public function testIsSingleton()
+    public function testIsSingleton(): void
     {
         $container = $this->container();
         $container->bind(Test::class);
@@ -156,9 +164,9 @@ class ContainerTest extends TestCase
     /**
      * Test forget.
      *
-     * @throws \Exception
+     * @throws Exception
      */
-    public function testForget()
+    public function testForget(): void
     {
         $container = $this->container();
         $container->singleton(Test::class);
@@ -178,9 +186,9 @@ class ContainerTest extends TestCase
     /**
      * Test bind.
      *
-     * @throws \Exception
+     * @throws Exception
      */
-    public function testBind()
+    public function testBind(): void
     {
         $container = $this->container();
         $container->bind(Test::class);
@@ -191,11 +199,11 @@ class ContainerTest extends TestCase
     /**
      * Test bind already bound.
      *
-     * @throws \Exception
+     * @throws Exception
      */
-    public function testBindAlreadyBound()
+    public function testBindAlreadyBound(): void
     {
-        $this->expectException(Exception::class);
+        $this->expectException(IoCException::class);
         $this->expectExceptionMessage('Class or interface ' . Test::class . ' already bound.');
         $container = $this->container();
         $container->bind(Test::class);
@@ -205,9 +213,9 @@ class ContainerTest extends TestCase
     /**
      * Test singleton.
      *
-     * @throws \Exception
+     * @throws Exception
      */
-    public function testSingleton()
+    public function testSingleton(): void
     {
         $container = $this->container();
         $container->singleton(Test::class);
@@ -218,19 +226,24 @@ class ContainerTest extends TestCase
     /**
      * Test instance.
      *
-     * @throws \Exception
+     * @throws Exception
      */
-    public function testInstance()
+    public function testInstance(): void
     {
-        $this->testHasInstance();
+        $container = $this->container();
+        $container->bind(Test::class);
+        $this->assertFalse($container->hasInstance(Test::class));
+        $container->instance(Test::class, new Test());
+        $this->assertTrue($container->hasInstance(Test::class));
+        $this->assertTrue($container->getBinding(Test::class)->isShared());
     }
 
     /**
      * Test make.
      *
-     * @throws Exception
+     * @throws IoCException
      */
-    public function testMake()
+    public function testMake(): void
     {
         $container = $this->container();
         $container->bind(BaseTestInterface::class, Test::class);
@@ -241,16 +254,16 @@ class ContainerTest extends TestCase
     /**
      * Test make with singleton.
      *
-     * @throws \Exception
+     * @throws Exception
      */
-    public function testMakeWithSingleton()
+    public function testMakeWithSingleton(): void
     {
         $container = $this->container();
         $container->singleton(BaseTestInterface::class, Test::class);
 
         // Make instance 1 and set test value.
         $instance1 = $container->make(BaseTestInterface::class);
-        $instance1->test = md5(mt_rand(1, 100000));
+        $instance1->test = md5((string)mt_rand(1, 100000));
 
         // Make instance 2 and test previous set value.
         $instance2 = $container->make(BaseTestInterface::class);
@@ -261,14 +274,14 @@ class ContainerTest extends TestCase
     /**
      * Test make no extends.
      *
-     * @throws \Exception
+     * @throws Exception
      */
-    public function testMakeNoExtends()
+    public function testMakeNoExtends(): void
     {
         $message = 'Class {class} does not extend {interface}';
         $message = str_replace('{class}', TestNoExtends::class, $message);
         $message = str_replace('{interface}', BaseTest::class, $message);
-        $this->expectException(Exception::class);
+        $this->expectException(IoCException::class);
         $this->expectExceptionMessage($message);
         $container = $this->container();
         $container->bind(BaseTest::class, TestNoExtends::class);
@@ -278,14 +291,14 @@ class ContainerTest extends TestCase
     /**
      * Test make no implements.
      *
-     * @throws \Exception
+     * @throws Exception
      */
-    public function testMakeNoImplements()
+    public function testMakeNoImplements(): void
     {
         $message = 'Class {class} does not implement {interface}';
         $message = str_replace('{class}', TestNoExtends::class, $message);
         $message = str_replace('{interface}', BaseTestInterface::class, $message);
-        $this->expectException(Exception::class);
+        $this->expectException(IoCException::class);
         $this->expectExceptionMessage($message);
         $container = $this->container();
         $container->bind(BaseTestInterface::class, TestNoExtends::class);
@@ -295,11 +308,11 @@ class ContainerTest extends TestCase
     /**
      * Test dependency injection not found.
      *
-     * @throws \Exception
+     * @throws Exception
      */
-    public function testDependencyInjectionNotFound()
+    public function testDependencyInjectionNotFound(): void
     {
-        $this->expectException(Exception::class);
+        $this->expectException(IoCException::class);
         $this->expectExceptionMessage('Class ' . TestInjectedInterface::class . ' does not exist.');
         $container = $this->container();
         $container->bind(TestDependencyInjection::class);
@@ -309,11 +322,11 @@ class ContainerTest extends TestCase
     /**
      * Test dependency injection injected.
      *
-     * @throws \Exception
+     * @throws Exception
      */
-    public function testDependencyInjectionInjected()
+    public function testDependencyInjectionInjected(): void
     {
-        $check = md5(mt_rand(1, 100000));
+        $check = md5((string)mt_rand(1, 100000));
         $container = $this->container();
         $container->bind(TestInjectedInterface::class, TestInjected::class);
         $container->bind(TestDependencyInjection::class);
@@ -324,11 +337,11 @@ class ContainerTest extends TestCase
     /**
      * Test validateClassOrInterface().
      *
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
-    public function testValidateClassOrInterface()
+    public function testValidateClassOrInterface(): void
     {
-        $this->expectException(Exception::class);
+        $this->expectException(IoCException::class);
         $this->expectExceptionMessage('Class or interface unknown.class does not exist.');
         $container = $this->container();
         Obj::callMethod('validateClassOrInterface', $container, [
@@ -336,9 +349,14 @@ class ContainerTest extends TestCase
         ]);
     }
 
-    public function testNewInstanceClassNotFound()
+    /**
+     * Test new instance class not found.
+     *
+     * @throws ReflectionException
+     */
+    public function testNewInstanceClassNotFound(): void
     {
-        $this->expectException(Exception::class);
+        $this->expectException(IoCException::class);
         $this->expectExceptionMessage('Class unknown.class does not exist');
         $container = $this->container();
         Obj::callMethod('newInstance', $container, [
@@ -347,26 +365,46 @@ class ContainerTest extends TestCase
         ]);
     }
 
-//    public function testNewInstanceMissingParameters()
-//    {
-////        $this->expectException(Exception::class);
-////        $this->expectExceptionMessage('Class unknown.class does not exist.');
-//        $container = $this->container();
-//
-//        $testInjected = new TestInjected();
-//
-//        Obj::callMethod('newInstance', $container, [
-//            'class' => TestDependencyInjection::class,
-//            'params' => []
-//        ]);
-//    }
+    /**
+     * Test newInstance reflection exception.
+     *
+     * @throws ReflectionException
+     */
+    public function testNewInstanceReflectionException(): void
+    {
+        $this->expectException(IoCException::class);
+        $this->expectExceptionMessage('fail.on.purpose');
+        $container = $this->container();
+        Obj::callMethod('newInstance', $container, [
+            'class' => BadClass::class,
+            'params' => []
+        ]);
+    }
+
+    /**
+     * Test new instance missing parameters.
+     *
+     * @throws ReflectionException
+     */
+    public function testNewInstanceMissingParameters(): void
+    {
+        $message = 'Too few arguments to function Tests\CoRex\IoC\Helpers\TestDependencyInjection::__construct(),' .
+            ' 0 passed and exactly 2 expected';
+        $this->expectException(\ArgumentCountError::class);
+        $this->expectExceptionMessage($message);
+        $container = $this->container();
+        Obj::callMethod('newInstance', $container, [
+            'class' => TestDependencyInjection::class,
+            'params' => []
+        ]);
+    }
 
     /**
      * Container.
      *
      * @return Container
      */
-    private function container()
+    private function container(): Container
     {
         $container = Container::getInstance();
         $container->clear();

@@ -1,41 +1,61 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CoRex\IoC;
+
+use CoRex\IoC\Exceptions\IoCException;
 
 class Binding
 {
+    /** @var string */
     private $classOrInterface;
+
+    /** @var bool */
     private $isInterface;
+
+    /** @var string */
     private $instanceClass;
+
+    /** @var bool */
     private $shared;
 
     /**
-     * Binding constructor.
+     * Binding.
+     *
      * @param string $classOrInterface
      * @param string $instanceClass
-     * @param boolean $shared
-     * @throws Exception
+     * @param bool $shared
+     * @throws IoCException
      */
-    public function __construct($classOrInterface, $instanceClass, $shared)
+    public function __construct(string $classOrInterface, string $instanceClass, bool $shared)
     {
         if (!$this->classExists($classOrInterface)) {
-            throw new Exception('Class ' . (string)$classOrInterface . ' does not exist.');
+            throw new IoCException('Class ' . (string)$classOrInterface . ' does not exist.');
         }
         if (!$this->classExists($instanceClass)) {
-            throw new Exception('Class ' . (string)$instanceClass . ' does not exist.');
+            throw new IoCException('Class ' . (string)$instanceClass . ' does not exist.');
         }
         $this->classOrInterface = $classOrInterface;
         $this->isInterface = interface_exists($classOrInterface);
         $this->instanceClass = $instanceClass;
-        $this->shared = (boolean)$shared;
+        $this->shared = (bool)$shared;
+    }
+
+    /**
+     * Set shared.
+     */
+    public function setShared(): void
+    {
+        $this->shared = true;
     }
 
     /**
      * Is shared.
      *
-     * @return boolean
+     * @return bool
      */
-    public function isShared()
+    public function isShared(): bool
     {
         return $this->shared;
     }
@@ -45,7 +65,7 @@ class Binding
      *
      * @return string
      */
-    public function getInstanceClass()
+    public function getInstanceClass(): string
     {
         return $this->instanceClass;
     }
@@ -54,9 +74,9 @@ class Binding
      * Class exist.
      *
      * @param string $class
-     * @return boolean
+     * @return bool
      */
-    private function classExists($class)
+    private function classExists(string $class): bool
     {
         $classOrInterfaceExists = false;
         if (interface_exists($class)) {

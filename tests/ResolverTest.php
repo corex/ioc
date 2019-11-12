@@ -1,11 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\CoRex\IoC;
 
-use CoRex\IoC\Exception;
+use CoRex\IoC\Exceptions\IoCException;
 use CoRex\IoC\Resolver;
 use PHPUnit\Framework\TestCase;
 use Tests\CoRex\IoC\Helpers\TestDependencyInjection;
+use Tests\CoRex\IoC\Helpers\TestDependencyInjectionDefaultValue;
 use Tests\CoRex\IoC\Helpers\TestInjectedInterface;
 
 class ResolverTest extends TestCase
@@ -13,11 +16,11 @@ class ResolverTest extends TestCase
     /**
      * Test resolve constructor.
      *
-     * @throws \CoRex\IoC\Exception
+     * @throws IoCException
      */
-    public function testResolveConstructor()
+    public function testResolveConstructor(): void
     {
-        $check = md5(mt_rand(1, 100000));
+        $check = md5((string)mt_rand(1, 100000));
         $resolvedParameters = Resolver::resolveConstructor(TestDependencyInjection::class, [
             'test' => $check
         ], false);
@@ -25,13 +28,25 @@ class ResolverTest extends TestCase
     }
 
     /**
+     * Test resolveConstructor bad class.
+     *
+     * @throws IoCException
+     */
+    public function testResolveConstructorBadClass(): void
+    {
+        $this->expectException(IoCException::class);
+        $this->expectExceptionMessage('Class not.a.class does not exist');
+        Resolver::resolveConstructor('not.a.class', [], false);
+    }
+
+    /**
      * Test resolve constructor null.
      *
-     * @throws Exception
+     * @throws IoCException
      */
-    public function testResolveConstructorNull()
+    public function testResolveConstructorNull(): void
     {
-        $this->expectException(Exception::class);
+        $this->expectException(IoCException::class);
         $this->expectExceptionMessage('Class test does not exist');
         Resolver::resolveConstructor('test', [], false);
     }
@@ -39,12 +54,27 @@ class ResolverTest extends TestCase
     /**
      * Test resolve constructor parameter not found.
      *
-     * @throws Exception
+     * @throws IoCException
      */
-    public function testResolveConstructorParameterNotFound()
+    public function testResolveConstructorParameterNotFound(): void
     {
-        $this->expectException(Exception::class);
+        $this->expectException(IoCException::class);
         $this->expectExceptionMessage('Parameter test not found.');
         Resolver::resolveConstructor(TestDependencyInjection::class, [], false);
+    }
+
+    /**
+     * Test resolveParameters not found default value.
+     *
+     * @throws IoCException
+     */
+    public function testResolveParametersNotFoundDefaultValue(): void
+    {
+        $check = md5((string)mt_rand(1, 100000));
+        $resolvedParameters = Resolver::resolveConstructor(TestDependencyInjectionDefaultValue::class, [
+            $check => $check
+        ], false);
+        $this->assertSame(TestInjectedInterface::class, $resolvedParameters[0]);
+        $this->assertSame(TestDependencyInjectionDefaultValue::DEFAULT_VALUE, $resolvedParameters[1]);
     }
 }

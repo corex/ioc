@@ -1,6 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CoRex\IoC;
+
+use CoRex\IoC\Exceptions\IoCException;
 
 class Resolver
 {
@@ -8,13 +12,16 @@ class Resolver
      * Resolve parameters.
      *
      * @param string $class
-     * @param array $resolveParameters Default [].
-     * @param boolean $resolveTypeHints Default true.
-     * @return array
-     * @throws Exception
+     * @param mixed[] $resolveParameters Default [].
+     * @param bool $resolveTypeHints Default true.
+     * @return mixed[]
+     * @throws IoCException
      */
-    public static function resolveConstructor($class, array $resolveParameters = [], $resolveTypeHints = true)
-    {
+    public static function resolveConstructor(
+        string $class,
+        array $resolveParameters = [],
+        bool $resolveTypeHints = true
+    ): array {
         $resolvedParameters = [];
         try {
             $reflectionClass = new \ReflectionClass($class);
@@ -26,7 +33,7 @@ class Resolver
                 }
             }
         } catch (\ReflectionException $e) {
-            throw new Exception($e->getMessage(), $e->getCode(), $e);
+            throw new IoCException($e->getMessage(), $e->getCode(), $e);
         }
         return $resolvedParameters;
     }
@@ -34,19 +41,31 @@ class Resolver
     /**
      * Resolve parameters.
      *
-     * @param array $parameters
-     * @param array $resolveParameters
-     * @param boolean $resolveTypeHints
-     * @return array
-     * @throws Exception
+     * @param mixed[] $parameters
+     * @param mixed[] $resolveParameters
+     * @param bool $resolveTypeHints
+     * @return mixed[]
+     * @throws IoCException
      */
-    private static function resolveParameters(array $parameters, array $resolveParameters, $resolveTypeHints)
-    {
+    private static function resolveParameters(
+        array $parameters,
+        array $resolveParameters,
+        bool $resolveTypeHints
+    ): array {
         $resolvedParameters = [];
         if (count($parameters) > 0) {
             foreach ($parameters as $parameter) {
                 $name = $parameter->getName();
-                $typeHint = $parameter->getType();
+                $hasDefaultValue = $parameter->isDefaultValueAvailable();
+                $defaultValue = $hasDefaultValue ? $parameter->getDefaultValue() : null;
+
+                // Extract type.
+                $typeHint = null;
+                $parameterReflectionClass = $parameter->getClass();
+                if ($parameterReflectionClass !== null) {
+                    $typeHint = $parameterReflectionClass->name;
+                }
+
                 if ($typeHint !== null) {
                     $classOrInterface = (string)$typeHint;
                     if ($resolveTypeHints) {
@@ -57,7 +76,11 @@ class Resolver
                 } elseif (array_key_exists($name, $resolveParameters)) {
                     $value = $resolveParameters[$name];
                 } else {
-                    throw new Exception('Parameter ' . $name . ' not found.');
+                    if ($hasDefaultValue) {
+                        $value = $defaultValue;
+                    } else {
+                        throw new IoCException('Parameter ' . $name . ' not found.');
+                    }
                 }
                 $resolvedParameters[] = $value;
             }

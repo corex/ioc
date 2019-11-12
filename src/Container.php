@@ -1,15 +1,24 @@
 <?php
 
+declare(strict_types=1);
+
 namespace CoRex\IoC;
+
+use CoRex\IoC\Exceptions\IoCException;
 
 class Container
 {
+    /** @var Container */
     private static $instance;
+
+    /** @var Binding[] */
     private $bindings;
+
+    /** @var object[] */
     private $instances;
 
     /**
-     * Container constructor.
+     * Container.
      */
     public function __construct()
     {
@@ -21,7 +30,7 @@ class Container
      *
      * @return Container
      */
-    public static function getInstance()
+    public static function getInstance(): self
     {
         if (!is_object(self::$instance)) {
             self::$instance = new static();
@@ -32,7 +41,7 @@ class Container
     /**
      * Clear.
      */
-    public function clear()
+    public function clear(): void
     {
         $this->bindings = [];
         $this->instances = [];
@@ -41,9 +50,9 @@ class Container
     /**
      * Get bindings.
      *
-     * @return array
+     * @return Binding[]
      */
-    public function getBindings()
+    public function getBindings(): array
     {
         return $this->bindings;
     }
@@ -54,7 +63,7 @@ class Container
      * @param string $classOrInterface
      * @return Binding
      */
-    public function getBinding($classOrInterface)
+    public function getBinding(string $classOrInterface): ?Binding
     {
         if ($this->has($classOrInterface)) {
             return $this->bindings[$classOrInterface];
@@ -66,9 +75,9 @@ class Container
      * Has.
      *
      * @param string $classOrInterface
-     * @return boolean
+     * @return bool
      */
-    public function has($classOrInterface)
+    public function has(string $classOrInterface): bool
     {
         return array_key_exists($classOrInterface, $this->bindings);
     }
@@ -77,9 +86,9 @@ class Container
      * Has instance.
      *
      * @param string $classOrInterface
-     * @return boolean
+     * @return bool
      */
-    public function hasInstance($classOrInterface)
+    public function hasInstance(string $classOrInterface): bool
     {
         return array_key_exists($classOrInterface, $this->instances) && is_object($this->instances[$classOrInterface]);
     }
@@ -88,9 +97,9 @@ class Container
      * Is shared.
      *
      * @param string $classOrInterface
-     * @return boolean
+     * @return bool
      */
-    public function isShared($classOrInterface)
+    public function isShared(string $classOrInterface): bool
     {
         if ($this->has($classOrInterface)) {
             return $this->getBinding($classOrInterface)->isShared();
@@ -102,9 +111,9 @@ class Container
      * Is singleton.
      *
      * @param string $classOrInterface
-     * @return boolean
+     * @return bool
      */
-    public function isSingleton($classOrInterface)
+    public function isSingleton(string $classOrInterface): bool
     {
         return $this->isShared($classOrInterface);
     }
@@ -114,7 +123,7 @@ class Container
      *
      * @param string $classOrInterface
      */
-    public function forget($classOrInterface)
+    public function forget(string $classOrInterface): void
     {
         if ($this->has($classOrInterface)) {
             unset($this->bindings[$classOrInterface]);
@@ -129,14 +138,14 @@ class Container
      *
      * @param string $classOrInterface
      * @param string $instanceClass Default null.
-     * @param boolean $shared Default false.
-     * @throws Exception
+     * @param bool $shared Default false.
+     * @throws IoCException
      */
-    public function bind($classOrInterface, $instanceClass = null, $shared = false)
+    public function bind(string $classOrInterface, ?string $instanceClass = null, bool $shared = false): void
     {
         // Check if already bound.
         if ($this->has($classOrInterface)) {
-            throw new Exception('Class or interface ' . $classOrInterface . ' already bound.');
+            throw new IoCException('Class or interface ' . $classOrInterface . ' already bound.');
         }
 
         $this->validateClassOrInterface($classOrInterface);
@@ -152,9 +161,9 @@ class Container
      *
      * @param string $classOrInterface
      * @param string $instanceClass Default null.
-     * @throws Exception
+     * @throws IoCException
      */
-    public function singleton($classOrInterface, $instanceClass = null)
+    public function singleton(string $classOrInterface, ?string $instanceClass = null): void
     {
         $this->bind($classOrInterface, $instanceClass, true);
     }
@@ -164,14 +173,15 @@ class Container
      *
      * @param string $classOrInterface
      * @param object $object
-     * @throws Exception
+     * @throws IoCException
      */
-    public function instance($classOrInterface, $object)
+    public function instance(string $classOrInterface, object $object): void
     {
         $this->validateObject($classOrInterface, $object);
         if (!$this->has($classOrInterface)) {
             $this->singleton($classOrInterface, get_class($object));
         }
+        $this->getBinding($classOrInterface)->setShared();
         $this->instances[$classOrInterface] = $object;
     }
 
@@ -179,11 +189,11 @@ class Container
      * Make.
      *
      * @param string $classOrInterface
-     * @param array $resolveParameters Default [].
+     * @param mixed[] $resolveParameters Default [].
      * @return object
-     * @throws Exception
+     * @throws IoCException
      */
-    public function make($classOrInterface, array $resolveParameters = [])
+    public function make(string $classOrInterface, array $resolveParameters = []): object
     {
         // Get binding details.
         $binding = $this->getBinding($classOrInterface);
@@ -209,6 +219,8 @@ class Container
         // Resolve and create instance.
         $resolvedParameters = Resolver::resolveConstructor($instanceClass, $resolveParameters);
         $instance = $this->newInstance($instanceClass, $resolvedParameters);
+
+        // If shared, store instance.
         if ($isShared) {
             $this->instances[$classOrInterface] = $instance;
         }
@@ -220,12 +232,12 @@ class Container
      * Validate class or interface.
      *
      * @param string $classOrInterface
-     * @throws Exception
+     * @throws IoCException
      */
-    private function validateClassOrInterface($classOrInterface)
+    private function validateClassOrInterface(string $classOrInterface): void
     {
         if (!$this->classExists($classOrInterface)) {
-            throw new Exception('Class or interface ' . $classOrInterface . ' does not exist.');
+            throw new IoCException('Class or interface ' . $classOrInterface . ' does not exist.');
         }
     }
 
@@ -234,26 +246,26 @@ class Container
      *
      * @param string $classOrInterface
      * @param string $instanceClass
-     * @throws Exception
+     * @throws IoCException
      */
-    private function validateInstanceClass($classOrInterface, $instanceClass)
+    private function validateInstanceClass(string $classOrInterface, string $instanceClass): void
     {
         // CHeck if concrete class exists.
         if (!class_exists($instanceClass)) {
-            throw new Exception('Class ' . $instanceClass . ' does not exist.');
+            throw new IoCException('Class ' . $instanceClass . ' does not exist.');
         }
 
         // If interface, check if instance class implements $classOrInterface.
         if (interface_exists($classOrInterface)) {
             if (!in_array($classOrInterface, class_implements($instanceClass))) {
-                throw new Exception('Class ' . $instanceClass . ' does not implement ' . $classOrInterface);
+                throw new IoCException('Class ' . $instanceClass . ' does not implement ' . $classOrInterface);
             }
         }
 
         // If class, check if instance class extends $classOrInterface.
         if (class_exists($classOrInterface)) {
-            if ($classOrInterface != $instanceClass && !in_array($classOrInterface, class_parents($instanceClass))) {
-                throw new Exception('Class ' . $instanceClass . ' does not extend ' . $classOrInterface);
+            if ($classOrInterface !== $instanceClass && !in_array($classOrInterface, class_parents($instanceClass))) {
+                throw new IoCException('Class ' . $instanceClass . ' does not extend ' . $classOrInterface);
             }
         }
     }
@@ -263,9 +275,9 @@ class Container
      *
      * @param string $classOrInterface
      * @param object $object
-     * @throws Exception
+     * @throws IoCException
      */
-    private function validateObject($classOrInterface, $object)
+    private function validateObject(string $classOrInterface, object $object): void
     {
         $this->validateInstanceClass($classOrInterface, get_class($object));
     }
@@ -274,17 +286,17 @@ class Container
      * New instance.
      *
      * @param string $class
-     * @param array $params
+     * @param mixed[] $params
      * @return object
-     * @throws Exception
+     * @throws IoCException
      */
-    private function newInstance($class, array $params)
+    private function newInstance(string $class, array $params): object
     {
         try {
             $reflectionClass = new \ReflectionClass($class);
             return $reflectionClass->newInstanceArgs($params);
         } catch (\ReflectionException $e) {
-            throw new Exception($e->getMessage(), $e->getCode(), $e);
+            throw new IoCException($e->getMessage(), $e->getCode(), $e);
         }
     }
 
@@ -292,9 +304,9 @@ class Container
      * Class exist.
      *
      * @param string $class
-     * @return boolean
+     * @return bool
      */
-    private function classExists($class)
+    private function classExists(string $class): bool
     {
         $classOrInterfaceExists = false;
         if (interface_exists($class)) {

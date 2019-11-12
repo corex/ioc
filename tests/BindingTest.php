@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tests\CoRex\IoC;
 
 use CoRex\Helpers\Obj;
 use CoRex\IoC\Binding;
-use CoRex\IoC\Exception;
+use CoRex\IoC\Exceptions\IoCException;
+use Exception;
 use PHPUnit\Framework\TestCase;
 use Tests\CoRex\IoC\Helpers\BaseTest;
 use Tests\CoRex\IoC\Helpers\BaseTestInterface;
@@ -14,13 +17,14 @@ class BindingTest extends TestCase
 {
     /**
      * Test constructor class.
-     * @throws \Exception
+     *
+     * @throws Exception
      */
-    public function testConstructorClass()
+    public function testConstructorClass(): void
     {
         $classOrInterface = BaseTest::class;
         $instanceClass = Test::class;
-        $shared = mt_rand(0, 1) == 1;
+        $shared = mt_rand(0, 1) === 1;
         $binding = new Binding($classOrInterface, $instanceClass, $shared);
 
         $this->assertEquals($classOrInterface, Obj::getProperty('classOrInterface', $binding));
@@ -31,13 +35,14 @@ class BindingTest extends TestCase
 
     /**
      * Test constructor interface.
-     * @throws \Exception
+     *
+     * @throws Exception
      */
-    public function testConstructorInterface()
+    public function testConstructorInterface(): void
     {
         $classOrInterface = BaseTestInterface::class;
         $instanceClass = Test::class;
-        $shared = mt_rand(0, 1) == 1;
+        $shared = mt_rand(0, 1) === 1;
         $binding = new Binding($classOrInterface, $instanceClass, $shared);
 
         $this->assertEquals($classOrInterface, Obj::getProperty('classOrInterface', $binding));
@@ -48,15 +53,16 @@ class BindingTest extends TestCase
 
     /**
      * Test constructor not class.
-     * @throws \Exception
+     *
+     * @throws Exception
      */
-    public function testConstructorNotClass()
+    public function testConstructorNotClass(): void
     {
-        $classOrInterface = md5(mt_rand(1, 100000));
+        $classOrInterface = md5((string)mt_rand(1, 100000));
         $instanceClass = Test::class;
-        $shared = mt_rand(0, 1) == 1;
+        $shared = mt_rand(0, 1) === 1;
 
-        $this->expectException(Exception::class);
+        $this->expectException(IoCException::class);
         $this->expectExceptionMessage('Class ' . $classOrInterface . ' does not exist.');
 
         new Binding($classOrInterface, $instanceClass, $shared);
@@ -64,15 +70,16 @@ class BindingTest extends TestCase
 
     /**
      * Test constructor not instance class.
-     * @throws \Exception
+     *
+     * @throws Exception
      */
-    public function testConstructorNotInstanceClass()
+    public function testConstructorNotInstanceClass(): void
     {
         $classOrInterface = BaseTest::class;
-        $instanceClass = md5(mt_rand(1, 100000));
-        $shared = mt_rand(0, 1) == 1;
+        $instanceClass = md5((string)mt_rand(1, 100000));
+        $shared = mt_rand(0, 1) === 1;
 
-        $this->expectException(Exception::class);
+        $this->expectException(IoCException::class);
         $this->expectExceptionMessage('Class ' . $instanceClass . ' does not exist.');
 
         new Binding($classOrInterface, $instanceClass, $shared);
@@ -80,26 +87,28 @@ class BindingTest extends TestCase
 
     /**
      * Test is shared.
-     * @throws \Exception
+     *
+     * @throws Exception
      */
-    public function testIsShared()
+    public function testIsShared(): void
     {
         $classOrInterface = BaseTest::class;
         $instanceClass = Test::class;
-        $shared = mt_rand(0, 1) == 1;
+        $shared = mt_rand(0, 1) === 1;
         $binding = new Binding($classOrInterface, $instanceClass, $shared);
         $this->assertEquals($shared, call_user_func([$binding, 'isShared']));
     }
 
     /**
      * Test get instance class.
-     * @throws \Exception
+     *
+     * @throws Exception
      */
-    public function testGetInstanceClass()
+    public function testGetInstanceClass(): void
     {
         $classOrInterface = BaseTest::class;
         $instanceClass = Test::class;
-        $shared = mt_rand(0, 1) == 1;
+        $shared = mt_rand(0, 1) === 1;
         $binding = new Binding($classOrInterface, $instanceClass, $shared);
         $this->assertEquals($instanceClass, call_user_func([$binding, 'getInstanceClass']));
     }
