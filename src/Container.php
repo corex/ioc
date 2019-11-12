@@ -157,13 +157,25 @@ class Container
     }
 
     /**
-     * Singleton.
+     * Bind singleton.
      *
      * @param string $classOrInterface
      * @param string $instanceClass Default null.
      * @throws IoCException
      */
-    public function singleton(string $classOrInterface, ?string $instanceClass = null): void
+    public function bindSingleton(string $classOrInterface, ?string $instanceClass = null): void
+    {
+        $this->bind($classOrInterface, $instanceClass, true);
+    }
+
+    /**
+     * Bind shared.
+     *
+     * @param string $classOrInterface
+     * @param string $instanceClass Default null.
+     * @throws IoCException
+     */
+    public function bindShared(string $classOrInterface, ?string $instanceClass = null): void
     {
         $this->bind($classOrInterface, $instanceClass, true);
     }
@@ -179,7 +191,7 @@ class Container
     {
         $this->validateObject($classOrInterface, $object);
         if (!$this->has($classOrInterface)) {
-            $this->singleton($classOrInterface, get_class($object));
+            $this->bindSingleton($classOrInterface, get_class($object));
         }
         $this->getBinding($classOrInterface)->setShared();
         $this->instances[$classOrInterface] = $object;

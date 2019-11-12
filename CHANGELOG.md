@@ -10,9 +10,11 @@
 - Required php 7.2+
 - Renamed Exception class to IoCException and moved to proper location.
 - Added strict coding standard in files.
+- Method singleton() renamed to bindSingleton().
 
 ### Added
 - Added changelog.
+- Added method bindShared() with same functionality as bindSingleton().
 
 ## 1.0.2
 

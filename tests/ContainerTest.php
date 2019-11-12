@@ -130,7 +130,7 @@ class ContainerTest extends TestCase
         $this->assertFalse($container->isShared(Test::class));
 
         $container->clear();
-        $container->singleton(Test::class);
+        $container->bindSingleton(Test::class);
         $this->assertTrue($container->isShared(Test::class));
     }
 
@@ -157,7 +157,7 @@ class ContainerTest extends TestCase
         $this->assertFalse($container->isSingleton(Test::class));
 
         $container->clear();
-        $container->singleton(Test::class);
+        $container->bindSingleton(Test::class);
         $this->assertTrue($container->isSingleton(Test::class));
     }
 
@@ -169,8 +169,8 @@ class ContainerTest extends TestCase
     public function testForget(): void
     {
         $container = $this->container();
-        $container->singleton(Test::class);
-        $container->singleton(TestNoExtends::class);
+        $container->bindSingleton(Test::class);
+        $container->bindSingleton(TestNoExtends::class);
 
         $this->assertTrue($container->has(Test::class));
         $this->assertTrue($container->has(TestNoExtends::class));
@@ -211,14 +211,27 @@ class ContainerTest extends TestCase
     }
 
     /**
-     * Test singleton.
+     * Test bind singleton.
      *
      * @throws Exception
      */
-    public function testSingleton(): void
+    public function testBindSingleton(): void
     {
         $container = $this->container();
-        $container->singleton(Test::class);
+        $container->bindSingleton(Test::class);
+        $this->assertTrue($container->has(Test::class));
+        $this->assertTrue($container->isShared(Test::class));
+    }
+
+    /**
+     * Test bind shared.
+     *
+     * @throws Exception
+     */
+    public function testBindShared(): void
+    {
+        $container = $this->container();
+        $container->bindShared(Test::class);
         $this->assertTrue($container->has(Test::class));
         $this->assertTrue($container->isShared(Test::class));
     }
@@ -259,7 +272,7 @@ class ContainerTest extends TestCase
     public function testMakeWithSingleton(): void
     {
         $container = $this->container();
-        $container->singleton(BaseTestInterface::class, Test::class);
+        $container->bindSingleton(BaseTestInterface::class, Test::class);
 
         // Make instance 1 and set test value.
         $instance1 = $container->make(BaseTestInterface::class);
